@@ -1,0 +1,13 @@
+{
+  "name": "APIjit",
+  "version": "1.0.1",
+  "description": "APIjit.",
+  "private": true,
+  "main": "callback.js",
+  "scripts": {
+    "start": "node callback"
+  },
+  "dependencies": {
+    "express": "~4.0.0"
+  }
+}
