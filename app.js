@@ -87,6 +87,8 @@ app.route('/')
 
               sms.save();
 
+              io.emit('existing SMS', sms);
+
               res.sendfile('views/index.html');
             });
           });
