@@ -17,7 +17,6 @@ var SMSSchema = mongoose.Schema({
   timestamp: String,
   content: String,
   replies: [{
-    from: String,
     timestamp: String,
     content: String
   }]
@@ -35,8 +34,9 @@ app.use(express.static(path.join(__dirname, '/public')));
 app.route('/smsreply')
   .post(function(req, res) {
 
+    console.log(res.body);
+
     var messageId = req.body.messageId;
-    var from = req.body.from;
     var timestamp = req.body.acknowledgedTimestamp;
     var content = req.body.content;
 
@@ -45,7 +45,6 @@ app.route('/smsreply')
       { 
         $push: {
           'replies': {
-            'from': from,
             'timestamp': timestamp,
             'content': content
           }
@@ -55,7 +54,7 @@ app.route('/smsreply')
       function(err, sms) {
         io.emit('new SMS', {
           'messageId': messageId,
-          'from': from,
+          'from': sms.to,
           'to': sms.from,
           'timestamp': timestamp,
           'content': content 
