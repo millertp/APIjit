@@ -32,6 +32,39 @@ app.use(bodyParser.urlencoded( { extended: true } ));
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, '/public')));
 
+app.route('/smsreply')
+  .post(function(req, res) {
+
+    var messageId = req.body.messageId;
+    var from = req.body.from;
+    var timestamp = req.body.acknowledgedTimestamp;
+    var content = req.body.content;
+
+    SMS.findOneAndUpdate(
+      { 'messageId': messageId },
+      { 
+        $push: {
+          'replies': {
+            'from': from,
+            'timestamp': timestamp,
+            'content': content
+          }
+        }
+      },
+      { 'new': true },
+      function(err, sms) {
+        io.emit('new SMS', {
+          'messageId': messageId,
+          'from': from,
+          'to': sms.from,
+          'timestamp': timestamp,
+          'content': content 
+        });
+        res.end();
+      }
+    );
+  });
+
 app.route('/')
   
   .get(function(req, res) {
@@ -93,39 +126,6 @@ app.route('/')
             });
           });
       });
-  });
-
-app.route('/smsreply')
-  .post(function(req, res) {
-
-    var messageId = req.body.messageId;
-    var from = req.body.from;
-    var timestamp = req.body.acknowledgedTimestamp;
-    var content = req.body.content;
-
-    SMS.findOneAndUpdate(
-      { 'messageId': messageId },
-      { 
-        $push: {
-          'replies': {
-            'from': from,
-            'timestamp': timestamp,
-            'content': content
-          }
-        }
-      },
-      { 'new': true },
-      function(err, sms) {
-        io.emit('new SMS', {
-          'messageId': messageId,
-          'from': from,
-          'to': sms.from,
-          'timestamp': timestamp,
-          'content': content 
-        });
-        res.end();
-      }
-    );
   });
 
 io.on('connection', function(socket) {
