@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+  
+  <title>APIjit</title>
+
+  <link rel="stylesheet" href="/bower_components/bootstrap/dist/css/bootstrap.min.css">
+  <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+  <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+  <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+    <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+  <![endif]-->
+
+  <link rel="stylesheet" href="/bower_components/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="/style/css/main.css">
+
+  <script src="/bower_components/jquery/dist/jquery.min.js"></script>
+  <script src="/bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    var socket = io.connect("http://localhost:3000");
+
+    socket.on("new SMS", function(data) {
+      addReplySMS(data.messageId, data.from, data.to, data.timestamp, data.content);
+    });
+
+    socket.on("existing SMS", function(data) {
+      addOriginalSMS(data.messageId, data.from, data.to, data.timestamp, data.content);
+      data.replies.forEach(function(reply) {
+        addReplySMS(data.messageId, reply.from, data.from, reply.timestamp, reply.content);
+      });
+    });
+
+    function addOriginalSMS(messageId, from, to, timestamp, content) {
+      $("<li data-value='" + messageId + "' style='display: none;'>" + from + ' to ' + to + " @ " + timestamp + "<br />" + content + "</li>").prependTo("#sms_history").slideDown('slow');
+    }
+
+    function addReplySMS(messageId, from, to, timestamp, content) {
+      $("<ul><li>" + from + ' to ' + to + ' @ ' + timestamp + "<br />" + content + "</li></ul>").appendTo("#sms_history [data-value='" + messageId + "']").slideDown('slow');
+    }
+  </script>
+</head>
+
+<body>
+
+  <div class="cp-wrapper col-sm-8">
+
+    <div class="cp-wrapper-inner">
+
+      <div class="cover-container">
+
+        <div class="masthead clearfix">
+          <div class="inner">
+            <a href="http://apijit.xyz"><h1 class="masthead-brand">APIjit</h1></a>
+            <nav>
+              <ul class="nav masthead-nav">
+                <li><a href="#">About</a></li>
+              </ul>
+            </nav>
+          </div>
+          <div class="inner">
+            <br /><br /><br />
+            <h2>Send an SMS</h2>
+            <br />
+            <form method="post" class="form-horizontal">
+              <div class="form-group">
+                <label for="from_name" class="col-sm-2 control-label">From</label>
+                <div class="col-sm-10">
+                  <input class="form-control" id="from_name" name="from_name" type="text" placeholder="Your name">
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="to_number" class="col-sm-2 control-label">To</label>
+                <div class="col-sm-10">
+                  <input class="form-control" id="to_number" name="to_number" type="text" placeholder="Recipient mobile number (e.g. 04xxxxxxxx)">
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="to_content" class="col-sm-2 control-label">Message</label>
+                <div class="col-sm-10">
+                  <textarea class="form-control" id="to_content" name="to_content" rows="4" placeholder="Message"></textarea>
+                  <p id="to_content_chars_left" class="pull-right">140 characters left</p>
+                </div>
+              </div>
+              <div class="form-group">
+                <div class="col-sm-12">
+                  <input class="btn btn-lg btn-success pull-right" type="submit" value="Send">
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <div class="mastfoot">
+          <div class="inner">
+            <p>Powered by <a href="http://dev.telstra.com" target="_blank">Telstra</a> - view source code on <a href="https://github.com/millertp/APIjit" target="_blank">GitHub</a>.</p>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <div class="sms-wrapper col-sm-4">
+
+    <ul id="sms_history">
+      <li>
+        Test @ 123123123UTC<br />
+        Hello this is some text.
+        <ul>
+          <li>
+            0413041313 @ 12312425345UTC<br />
+            This is my reply!
+          </li>
+          <li>
+            0413041313 @ 12312425345UTC<br />
+            This is my reply!
+          </li>
+      </li>
+
+    </ul>
+
+  </div>
+
+<script>
+  $("#to_content, #from_name").on("keyup", function(e) {
+    var len = $("#to_content").val().length + $("#from_name").val().length;
+    $('#to_content_chars_left').text((140 - len) + " characters left");
+  });
+</script>
+
+</body>
+
+</html>

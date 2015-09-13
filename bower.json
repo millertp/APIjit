@@ -1,0 +1,10 @@
+{
+  "name": "APIjit",
+  "version": "0.0.1",
+  "dependencies": {
+    "bootstrap": "latest",
+    "font-awesome": "latest",
+    "jquery": "latest",
+    "jquery-ui": "latest"
+  }
+}

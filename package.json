@@ -9,6 +9,11 @@
   },
   "dependencies": {
     "express": "~4.0.0",
-    "request": "*"
+    "request": "*",
+    "socket.io": "*",
+    "mongoose": "*",
+    "path": "*",
+    "mongoose": "*",
+    "body-parser": "*"
   }
 }
