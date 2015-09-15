@@ -33,11 +33,12 @@
     });
 
     socket.on("existing SMS", function(data) {
-      $("#sms_history").empty();
-      addOriginalSMS(data.messageId, data.from, data.to, data.timestamp, data.content);
-      data.replies.forEach(function(reply) {
-        addReplySMS(data.messageId, reply.from, data.from, reply.timestamp, reply.content);
-      });
+      if ($("#sms_history [data-value='" + data.messageId + "']").length === 0) {
+        addOriginalSMS(data.messageId, data.from, data.to, data.timestamp, data.content);
+        data.replies.forEach(function(reply) {
+          addReplySMS(data.messageId, reply.from, data.from, reply.timestamp, reply.content);
+        });
+      }
     });
 
     function addOriginalSMS(messageId, from, to, timestamp, content) {
