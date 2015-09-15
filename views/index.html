@@ -19,6 +19,7 @@
   <![endif]-->
 
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
+  <link rel='stylesheet' href='https://fonts.googleapis.com/css?family=Open+Sans:300,600|Signika:700' type='text/css'>
   <link rel="stylesheet" href="/style/css/main.css">
 
 </head>
@@ -27,60 +28,46 @@
 
   <div class="cp-wrapper col-sm-8">
 
-    <div class="cp-wrapper-inner">
-
-      <div class="cover-container">
-
-        <div class="masthead clearfix">
-          <div class="inner">
-            <a href="http://apijit.xyz"><h1 class="masthead-brand">APIjit</h1></a>
-            <nav>
-              <ul class="nav masthead-nav">
-                <li><a href="#">About</a></li>
-              </ul>
-            </nav>
-          </div>
-          <div class="inner">
-            <br /><br /><br />
-            <h2>Send an SMS</h2>
-            <br />
-            <form method="post" class="form-horizontal">
-              <div class="form-group">
-                <label for="from_name" class="col-sm-2 control-label">From</label>
-                <div class="col-sm-10">
-                  <input class="form-control" id="from_name" name="from_name" type="text" placeholder="Your name">
-                </div>
-              </div>
-              <div class="form-group">
-                <label for="to_number" class="col-sm-2 control-label">To</label>
-                <div class="col-sm-10">
-                  <input class="form-control" id="to_number" name="to_number" type="text" placeholder="Recipient mobile number (e.g. 04xxxxxxxx)">
-                </div>
-              </div>
-              <div class="form-group">
-                <label for="to_content" class="col-sm-2 control-label">Message</label>
-                <div class="col-sm-10">
-                  <textarea class="form-control" id="to_content" name="to_content" rows="4" placeholder="Message"></textarea>
-                  <p id="to_content_chars_left" class="pull-right">140 characters left</p>
-                </div>
-              </div>
-              <div class="form-group">
-                <div class="col-sm-12">
-                  <input class="btn btn-lg btn-success pull-right" type="submit" value="Send">
-                </div>
-              </div>
-            </form>
-          </div>
-        </div>
-
-        <div class="mastfoot">
-          <div class="inner">
-            <p>Powered by <a href="http://dev.telstra.com" target="_blank">Telstra</a> - view source code on <a href="https://github.com/millertp/APIjit" target="_blank">GitHub</a>.</p>
-          </div>
-        </div>
-
+    <div class="header col-sm-12">
+      <div class="col-sm-6">
+        <a href="http://apijit.xyz"><h1 class="brand">APIjit.xyz</h1></a>
       </div>
+      <div class="col-sm-6">
+        <h2 class="title">Send an SMS</h2>
+      </div>
+    </div>
 
+    <div class="content col-sm-12">
+      <form method="post" class="form-horizontal">
+        <div class="form-group">
+          <label for="from_name" class="col-sm-2 control-label">From</label>
+          <div class="col-sm-10">
+            <input class="form-control" id="from_name" name="from_name" type="text" placeholder="Your name">
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="to_number" class="col-sm-2 control-label">To</label>
+          <div class="col-sm-10">
+            <input class="form-control" id="to_number" name="to_number" type="text" placeholder="Recipient mobile number (e.g. 04xxxxxxxx)">
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="to_content" class="col-sm-2 control-label">Message</label>
+          <div class="col-sm-10">
+            <textarea class="form-control" id="to_content" name="to_content" rows="4" placeholder="Message"></textarea>
+            <p id="to_content_chars_left" class="pull-right">140 characters left</p>
+          </div>
+        </div>
+        <div class="form-group">
+          <div class="col-sm-12">
+            <input class="btn btn-lg btn-success pull-right" type="submit" value="Send">
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <div class="footer col-sm-12">
+      <p>Powered by <a href="http://dev.telstra.com" target="_blank">Telstra</a> - view source code on <a href="https://github.com/millertp/APIjit" target="_blank">GitHub</a>.</p>
     </div>
 
   </div>
@@ -94,7 +81,6 @@
   <script src="https://code.jquery.com/jquery-1.11.3.min.js"></script>
   <script src="https://code.jquery.com/ui/1.11.4/jquery-ui.min.js"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
-
   <script src="/socket.io/socket.io.js"></script>
   <script>
 
@@ -102,6 +88,14 @@
       var len = $("#to_content").val().length + $("#from_name").val().length;
       $('#to_content_chars_left').text((140 - len) + " characters left");
     });
+
+    function addOriginalSMS(messageId, from, to, timestamp, content) {
+      $("<li data-value='" + messageId + "' style='display: none;'><p class='header'>" + from + ' to ' + to + " @ " + timestamp + "</p><p class='body'>" + content + "</p></li>").prependTo("#sms_history").slideDown('slow');
+    }
+
+    function addReplySMS(messageId, from, to, timestamp, content) {
+      $("<ul><li><p class='header'>" + from + ' to ' + to + ' @ ' + timestamp + "</p><p class='body'>" + content + "</p></li></ul>").appendTo("#sms_history [data-value='" + messageId + "']").show('shake');
+    }
 
     var socket = io.connect();
 
@@ -113,18 +107,10 @@
       if ($("#sms_history [data-value='" + data.messageId + "']").length === 0) {
         addOriginalSMS(data.messageId, data.from, data.to, data.timestamp, data.content);
         data.replies.forEach(function(reply) {
-          addReplySMS(data.messageId, reply.from, data.from, reply.timestamp, reply.content);
+          addReplySMS(data.messageId, data.to, data.from, reply.timestamp, reply.content);
         });
       }
     });
-
-    function addOriginalSMS(messageId, from, to, timestamp, content) {
-      $("<li data-value='" + messageId + "' style='display: none;'>" + from + ' to ' + to + " @ " + timestamp + "<br />" + content + "</li>").prependTo("#sms_history").slideDown('slow');
-    }
-
-    function addReplySMS(messageId, from, to, timestamp, content) {
-      $("<ul><li>" + from + ' to ' + to + ' @ ' + timestamp + "<br />" + content + "</li></ul>").appendTo("#sms_history [data-value='" + messageId + "']").show('shake');
-    }
 
   </script>
 
