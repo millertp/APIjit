@@ -21,35 +21,6 @@
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
   <link rel="stylesheet" href="/style/css/main.css">
 
-  <script src="https://code.jquery.com/jquery-1.11.3.min.js"></script>
-  <script src="https://code.jquery.com/ui/1.11.4/jquery-ui.min.js"></script>
-  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
-
-  <script src="/socket.io/socket.io.js"></script>
-  <script>
-    var socket = io.connect();
-
-    socket.on("new SMS", function(data) {
-      addReplySMS(data.messageId, data.from, data.to, data.timestamp, data.content);
-    });
-
-    socket.on("existing SMS", function(data) {
-      if ($("#sms_history [data-value='" + data.messageId + "']").length === 0) {
-        addOriginalSMS(data.messageId, data.from, data.to, data.timestamp, data.content);
-        data.replies.forEach(function(reply) {
-          addReplySMS(data.messageId, reply.from, data.from, reply.timestamp, reply.content);
-        });
-      }
-    });
-
-    function addOriginalSMS(messageId, from, to, timestamp, content) {
-      $("<li data-value='" + messageId + "' style='display: none;'>" + from + ' to ' + to + " @ " + timestamp + "<br />" + content + "</li>").prependTo("#sms_history").slideDown('slow');
-    }
-
-    function addReplySMS(messageId, from, to, timestamp, content) {
-      $("<ul><li>" + from + ' to ' + to + ' @ ' + timestamp + "<br />" + content + "</li></ul>").appendTo("#sms_history [data-value='" + messageId + "']").show('shake');
-    }
-  </script>
 </head>
 
 <body>
@@ -120,12 +91,42 @@
 
   </div>
 
-<script>
-  $("#to_content, #from_name").on("keyup", function(e) {
-    var len = $("#to_content").val().length + $("#from_name").val().length;
-    $('#to_content_chars_left').text((140 - len) + " characters left");
-  });
-</script>
+  <script src="https://code.jquery.com/jquery-1.11.3.min.js"></script>
+  <script src="https://code.jquery.com/ui/1.11.4/jquery-ui.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+
+    $("#to_content, #from_name").on("keyup", function(e) {
+      var len = $("#to_content").val().length + $("#from_name").val().length;
+      $('#to_content_chars_left').text((140 - len) + " characters left");
+    });
+
+    var socket = io.connect();
+
+    socket.on("new SMS", function(data) {
+      addReplySMS(data.messageId, data.from, data.to, data.timestamp, data.content);
+    });
+
+    socket.on("existing SMS", function(data) {
+      if ($("#sms_history [data-value='" + data.messageId + "']").length === 0) {
+        addOriginalSMS(data.messageId, data.from, data.to, data.timestamp, data.content);
+        data.replies.forEach(function(reply) {
+          addReplySMS(data.messageId, reply.from, data.from, reply.timestamp, reply.content);
+        });
+      }
+    });
+
+    function addOriginalSMS(messageId, from, to, timestamp, content) {
+      $("<li data-value='" + messageId + "' style='display: none;'>" + from + ' to ' + to + " @ " + timestamp + "<br />" + content + "</li>").prependTo("#sms_history").slideDown('slow');
+    }
+
+    function addReplySMS(messageId, from, to, timestamp, content) {
+      $("<ul><li>" + from + ' to ' + to + ' @ ' + timestamp + "<br />" + content + "</li></ul>").appendTo("#sms_history [data-value='" + messageId + "']").show('shake');
+    }
+
+  </script>
 
 </body>
 
