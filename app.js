@@ -34,8 +34,6 @@ app.use(express.static(path.join(__dirname, '/public')));
 app.route('/smsreply')
   .post(function(req, res) {
 
-    console.log(res.body);
-
     var messageId = req.body.messageId;
     var timestamp = req.body.acknowledgedTimestamp;
     var content = req.body.content;
